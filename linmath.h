@@ -2,6 +2,7 @@
 #define LINMATH_H
 
 #include <math.h>
+#include <strings.h>
 
 typedef float vec3[3];
 static inline void vec3_add(vec3 r, vec3 a, vec3 b)
@@ -45,12 +46,57 @@ static inline void vec3_norm(vec3 r, vec3 v)
 	float k = 1.f / vec3_len(v);
 	vec3_scale(r, v, k);
 }
+
 static inline void vec3_reflect(vec3 r, vec3 v, vec3 n)
 {
 	float p  = 2.f*vec3_mul_inner(v, n);
 	int i;
 	for(i=0;i<3;++i)
 		r[i] = v[i] - p*n[i];
+}
+
+typedef vec3 mat3x3[3];
+
+static inline void mat3x3_identity(mat3x3 M)
+{
+	bzero(M, sizeof(M));
+	for(int i = 3; i--;){
+		for(int j = 3; j--;){
+			if(i == j){
+				M[i][i] = 1;
+			}
+			else{
+				M[i][j] = 0;
+			}
+		}
+	}
+}
+
+static inline float mat3x3_row_col(mat3x3 M, mat3x3 N, int row, int col)
+{
+	float d = 0;
+	for(int i = 3; i--;) d += M[i][row] * N[col][i];
+	return d;
+}
+
+static inline void mat3x3_mul(mat3x3 R, mat3x3 M, mat3x3 N)
+{
+	for(int j = 3; j--;){
+		for(int i = 3; i--;){
+			R[i][j] = mat3x3_row_col(M, N, j, i);
+		}
+	}
+} 
+
+static inline void mat3x3_scl(mat3x3 R, float x, float y, float z)
+{
+	R[0][0] *= x; R[1][1] *= y; R[2][2] *= z;
+}
+
+static inline void mat3x3_translate(mat3x3 R, float dx, float dy)
+{
+	R[2][0] += dx;
+	R[2][1] += dy;
 }
 
 typedef float vec4[4];
