@@ -5,6 +5,14 @@
 #include <strings.h>
 
 typedef float vec3[3];
+
+typedef union {
+	vec3 v;
+	struct {
+		float x, y, z;
+	};
+} vec3_t;
+
 static inline void vec3_add(vec3 r, vec3 a, vec3 b)
 {
 	int i;
