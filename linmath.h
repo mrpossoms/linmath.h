@@ -4,6 +4,7 @@
 #include <math.h>
 #include <strings.h>
 
+
 typedef float vec3[3];
 
 typedef union {
@@ -31,6 +32,14 @@ static inline void vec3_scale(vec3 r, vec3 v, float s)
 	for(i=0; i<3; ++i)
 		r[i] = v[i] * s;
 }
+
+static inline void vec3_hadamard(vec3 r, vec3 a, vec3 b)
+{
+	r[0] = a[0] * b[0];
+	r[1] = a[1] * b[1];
+	r[2] = a[2] * b[2];
+}
+
 static inline float vec3_mul_inner(vec3 a, vec3 b)
 {
 	float p = 0.f;
@@ -64,6 +73,102 @@ static inline void vec3_reflect(vec3 r, vec3 v, vec3 n)
 }
 
 typedef vec3 mat3x3[3];
+
+#ifdef __cplusplus
+
+struct Vec3{
+	float* v;	
+	float x, y, z;
+
+	Vec3() {}
+	Vec3(float x, float y, float z)
+	{
+		this->x = x, this->y = y, this->z = z;
+		this->v = &this->x;
+	}
+
+	Vec3& operator=(Vec3& v)
+	{
+		this->x = v.x;
+		this->y = v.y;
+		this->z = v.z;
+		return *this;
+	}
+
+	int operator==(Vec3& v)
+	{
+		return this->x == v.x &&
+		       this->y == v.y &&
+		       this->z == v.z;
+	}
+
+	Vec3 operator+(Vec3& v)
+	{
+		Vec3 r;
+		vec3_add(r.v, this->v, v.v);
+		return r;
+	}
+	
+	Vec3& operator+=(Vec3& v)
+	{
+		vec3_add(this->v, this->v, v.v);
+		return *this;
+	}
+
+	Vec3 operator-(Vec3& v)
+	{
+		Vec3 r;
+		vec3_sub(r.v, this->v, v.v);
+		return r;
+	}
+	
+	Vec3& operator-=(Vec3& v)
+	{
+		vec3_sub(this->v, this->v, v.v);
+		return *this;
+	}
+
+	Vec3 operator*(Vec3& v)
+	{
+		Vec3 r;
+		vec3_hadamard(r.v, this->v, v.v);
+		return r;
+	}
+	
+	Vec3& operator*=(Vec3& v)
+	{
+		vec3_hadamard(this->v, this->v, v.v);
+		return *this;
+	}
+
+	Vec3 operator*(float s)
+	{
+		Vec3 r;
+		vec3_scale(r.v, this->v, s);
+		return r;
+	}
+	
+	Vec3& operator*=(float s)
+	{
+		vec3_scale(this->v, this->v, s);
+		return *this;
+	}
+	
+	Vec3 operator/(float s)
+	{
+		Vec3 r;
+		vec3_scale(r.v, this->v, 1.f / s);
+		return r;
+	}
+
+	Vec3& operator/=(float s)
+	{
+		vec3_scale(this->v, this->v, 1.f / s);
+		return *this;
+	}
+};
+
+#endif
 
 static inline void mat3x3_identity(mat3x3 M)
 {
