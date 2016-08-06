@@ -33,6 +33,14 @@ static inline void vec3_scale(vec3 r, vec3 v, float s)
 		r[i] = v[i] * s;
 }
 
+static inline void vec3_lerp(vec3 r, vec3 a, vec3 b, float p)
+{
+	float pa = 1.f - p;
+	r[0] = a[0] * pa + b[0] * p;
+	r[1] = a[1] * pa + b[1] * p;
+	r[2] = a[2] * pa + b[2] * p;
+}
+
 static inline void vec3_hadamard(vec3 r, vec3 a, vec3 b)
 {
 	r[0] = a[0] * b[0];
@@ -48,6 +56,7 @@ static inline float vec3_mul_inner(vec3 a, vec3 b)
 		p += b[i]*a[i];
 	return p;
 }
+
 static inline void vec3_mul_cross(vec3 r, vec3 a, vec3 b)
 {
 	r[0] = a[1]*b[2] - a[2]*b[1];
@@ -87,7 +96,7 @@ struct Vec3{
 		this->v = &this->x;
 	}
 
-	Vec3& operator=(Vec3& v)
+	Vec3& operator=(Vec3 v)
 	{
 		this->x = v.x;
 		this->y = v.y;
@@ -95,7 +104,7 @@ struct Vec3{
 		return *this;
 	}
 
-	int operator==(Vec3& v)
+	int operator==(Vec3 v)
 	{
 		return this->x == v.x &&
 		       this->y == v.y &&
@@ -109,7 +118,7 @@ struct Vec3{
 		return r;
 	}
 	
-	Vec3& operator+=(Vec3& v)
+	Vec3& operator+=(Vec3 v)
 	{
 		vec3_add(this->v, this->v, v.v);
 		return *this;
@@ -122,7 +131,7 @@ struct Vec3{
 		return r;
 	}
 	
-	Vec3& operator-=(Vec3& v)
+	Vec3& operator-=(Vec3 v)
 	{
 		vec3_sub(this->v, this->v, v.v);
 		return *this;
@@ -135,7 +144,7 @@ struct Vec3{
 		return r;
 	}
 	
-	Vec3& operator*=(Vec3& v)
+	Vec3& operator*=(Vec3 v)
 	{
 		vec3_hadamard(this->v, this->v, v.v);
 		return *this;
@@ -167,6 +176,12 @@ struct Vec3{
 		return *this;
 	}
 };
+const Vec3 VEC3_ZERO(0, 0, 0);
+const Vec3 VEC3_ONE(1, 1, 1);
+const Vec3 VEC3_LEFT(1, 0, 0);
+const Vec3 VEC3_UP(0, 1, 0);
+const Vec3 VEC3_FORWARD(0, 0, 1);
+
 
 #endif
 
@@ -696,5 +711,100 @@ static inline void quat_from_mat4x4(quat q, mat4x4 M)
 	q[2] = (M[p[2]][p[0]] - M[p[0]][p[2]])/(2.f*r);
 	q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]])/(2.f*r);
 }
+
+#ifdef __cplusplus
+
+struct Quat{
+	float* v;
+	float x, y, z, w;
+
+	Quat() {}
+	Quat(float x, float y, float z, float w)
+	{
+		this->x = x, this->y = y, this->z = z; this->w = w;
+		this->v = &this->x;
+	}
+
+	Quat& operator=(Quat v)
+	{
+		this->x = v.x;
+		this->y = v.y;
+		this->z = v.z;
+		this->w = v.w;
+		return *this;
+	}
+
+	int operator==(Quat& v)
+	{
+		return this->x == v.x &&
+		       this->y == v.y &&
+		       this->z == v.z &&
+		       this->w == v.w;
+	}
+
+	Quat operator+(Quat& v)
+	{
+		Quat r;
+		quat_add(r.v, this->v, v.v);
+		return r;
+	}
+	
+	Quat& operator+=(Quat v)
+	{
+		quat_add(this->v, this->v, v.v);
+		return *this;
+	}
+
+	Quat operator-(Quat& v)
+	{
+		Quat r;
+		quat_sub(r.v, this->v, v.v);
+		return r;
+	}
+	
+	Quat& operator-=(Quat v)
+	{
+		quat_sub(this->v, this->v, v.v);
+		return *this;
+	}
+
+	Quat operator*(Quat& v)
+	{
+		Quat r;
+		quat_mul(r.v, this->v, v.v);
+		return r;
+	}
+
+	Quat& operator*=(Quat s)
+	{
+		quat_mul(this->v, this->v, s.v);
+		return *this;
+	}
+
+	Quat operator*(float s)
+	{
+		Quat r;
+		quat_scale(r.v, this->v, s);
+		return r;
+	}
+	
+	
+	Quat operator/(float s)
+	{
+		Quat r;
+		quat_scale(r.v, this->v, 1.f / s);
+		return r;
+	}
+
+	Quat& operator/=(float s)
+	{
+		quat_scale(this->v, this->v, 1.f / s);
+		return *this;
+	}
+
+};
+const Quat QUAT_IDENTITY(0, 0, 0, 1);
+
+#endif
 
 #endif
