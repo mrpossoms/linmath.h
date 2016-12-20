@@ -86,10 +86,10 @@ typedef vec3 mat3x3[3];
 #ifdef __cplusplus
 
 struct Vec3{
-	float* v;	
+	float* v;
 	float x, y, z;
 
-	Vec3() {}
+	Vec3() { this->v = &this->x; }
 	Vec3(float x, float y, float z)
 	{
 		this->x = x, this->y = y, this->z = z;
@@ -117,7 +117,7 @@ struct Vec3{
 		vec3_add(r.v, this->v, v.v);
 		return r;
 	}
-	
+
 	Vec3& operator+=(Vec3 v)
 	{
 		vec3_add(this->v, this->v, v.v);
@@ -130,7 +130,7 @@ struct Vec3{
 		vec3_sub(r.v, this->v, v.v);
 		return r;
 	}
-	
+
 	Vec3& operator-=(Vec3 v)
 	{
 		vec3_sub(this->v, this->v, v.v);
@@ -143,7 +143,7 @@ struct Vec3{
 		vec3_hadamard(r.v, this->v, v.v);
 		return r;
 	}
-	
+
 	Vec3& operator*=(Vec3 v)
 	{
 		vec3_hadamard(this->v, this->v, v.v);
@@ -156,13 +156,13 @@ struct Vec3{
 		vec3_scale(r.v, this->v, s);
 		return r;
 	}
-	
+
 	Vec3& operator*=(float s)
 	{
 		vec3_scale(this->v, this->v, s);
 		return *this;
 	}
-	
+
 	Vec3 operator/(float s)
 	{
 		Vec3 r;
@@ -342,6 +342,16 @@ static inline void mat4x4_mul(mat4x4 M, mat4x4 a, mat4x4 b)
 		M[c][r] = 0.f;
 		for(k=0; k<4; ++k)
 			M[c][r] += a[k][r] * b[c][k];
+	}
+}
+static inline void mat4x4_mul_vec3(vec4 r, mat4x4 M, vec3 w)
+{
+	vec4 v = { w[0], w[1], w[2], 1 };
+	int i, j;
+	for(j=0; j<4; ++j) {
+		r[j] = 0.f;
+		for(i=0; i<4; ++i)
+			r[j] += M[i][j] * v[i];
 	}
 }
 static inline void mat4x4_mul_vec4(vec4 r, mat4x4 M, vec4 v)
@@ -586,6 +596,7 @@ static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
 }
 
 typedef float quat[4];
+
 static inline void quat_identity(quat q)
 {
 	q[0] = q[1] = q[2] = 0.f;
@@ -634,15 +645,35 @@ static inline void quat_conj(quat r, quat q)
 		r[i] = -q[i];
 	r[3] = q[3];
 }
+static inline void quat_from_axis_angle(quat q, float x, float y, float z, float angle)
+{
+	float a = sin(angle / 2);
+
+	q[0] = x * a;
+	q[1] = y * a;
+	q[2] = z * a;
+	q[3] = cos(angle / 2);
+}
 #define quat_norm vec4_norm
 static inline void quat_mul_vec3(vec3 r, quat q, vec3 v)
 {
-	quat v_ = {v[0], v[1], v[2], 0.f};
+/*
+ * Method by Fabian 'ryg' Giessen (of Farbrausch)
+t = 2 * cross(q.xyz, v)
+v' = v + q.w * t + cross(q.xyz, t)
+ */
+	vec3 t;
+	vec3 q_xyz = {q[0], q[1], q[2]};
+	vec3 u = {q[0], q[1], q[2]};
 
-	quat_conj(r, q);
-	quat_norm(r, r);
-	quat_mul(r, v_, r);
-	quat_mul(r, q, r);
+	vec3_mul_cross(t, q_xyz, v);
+	vec3_scale(t, t, 2);
+
+	vec3_mul_cross(u, q_xyz, t);
+	vec3_scale(t, t, q[3]);
+
+	vec3_add(r, v, t);
+	vec3_add(r, r, u);
 }
 static inline void mat4x4_from_quat(mat4x4 M, quat q)
 {
@@ -748,7 +779,7 @@ struct Quat{
 		quat_add(r.v, this->v, v.v);
 		return r;
 	}
-	
+
 	Quat& operator+=(Quat v)
 	{
 		quat_add(this->v, this->v, v.v);
@@ -761,7 +792,7 @@ struct Quat{
 		quat_sub(r.v, this->v, v.v);
 		return r;
 	}
-	
+
 	Quat& operator-=(Quat v)
 	{
 		quat_sub(this->v, this->v, v.v);
@@ -787,8 +818,8 @@ struct Quat{
 		quat_scale(r.v, this->v, s);
 		return r;
 	}
-	
-	
+
+
 	Quat operator/(float s)
 	{
 		Quat r;
@@ -803,7 +834,6 @@ struct Quat{
 	}
 
 };
-const Quat QUAT_IDENTITY(0, 0, 0, 1);
 
 #endif
 
