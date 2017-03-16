@@ -14,6 +14,13 @@ typedef union {
 	};
 } vec3_t;
 
+static inline void vec3_copy(vec3 d, vec3 s)
+{
+	d[0] = s[0];
+	d[1] = s[1];
+	d[2] = s[2];
+}
+
 static inline void vec3_add(vec3 r, vec3 a, vec3 b)
 {
 	int i;
@@ -110,6 +117,14 @@ struct Vec3{
 		       this->y == v.y &&
 		       this->z == v.z;
 	}
+
+	Vec3 operator+(Vec3 v)
+	{
+		Vec3 r;
+		vec3_add(r.v, this->v, v.v);
+		return r;
+	}
+
 
 	Vec3 operator+(Vec3& v)
 	{
