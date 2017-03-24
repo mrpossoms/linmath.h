@@ -97,6 +97,13 @@ struct Vec3{
 	float x, y, z;
 
 	Vec3() { this->v = &this->x; }
+
+	Vec3(const Vec3& v)
+	{
+		this->x = v.x, this->y = v.y, this->z = v.z;
+		this->v = &this->x;
+	}
+
 	Vec3(float x, float y, float z)
 	{
 		this->x = x, this->y = y, this->z = z;
@@ -126,12 +133,12 @@ struct Vec3{
 	}
 
 
-	Vec3 operator+(Vec3& v)
-	{
-		Vec3 r;
-		vec3_add(r.v, this->v, v.v);
-		return r;
-	}
+	// Vec3 operator+(Vec3& v)
+	// {
+	// 	Vec3 r;
+	// 	vec3_add(r.v, this->v, v.v);
+	// 	return r;
+	// }
 
 	Vec3& operator+=(Vec3 v)
 	{
@@ -189,6 +196,20 @@ struct Vec3{
 	{
 		vec3_scale(this->v, this->v, 1.f / s);
 		return *this;
+	}
+
+	Vec3& operator/=(Vec3 s)
+	{
+		this->v[0] /= s.v[0];
+		this->v[1] /= s.v[1];
+		this->v[2] /= s.v[2];
+
+		return *this;
+	}
+
+	float dot(Vec3& v)
+	{
+		return vec3_mul_inner(this->v, v.v);
 	}
 };
 const Vec3 VEC3_ZERO(0, 0, 0);
@@ -662,12 +683,13 @@ static inline void quat_conj(quat r, quat q)
 }
 static inline void quat_from_axis_angle(quat q, float x, float y, float z, float angle)
 {
-	float a = sin(angle / 2);
+	float a_2 = angle / 2;
+	float a = sin(a_2);
 
 	q[0] = x * a;
 	q[1] = y * a;
 	q[2] = z * a;
-	q[3] = cos(angle / 2);
+	q[3] = cos(a_2);
 }
 #define quat_norm vec4_norm
 static inline void quat_mul_vec3(vec3 r, quat q, vec3 v)
@@ -728,6 +750,7 @@ static inline void mat4x4_mul_quat(mat4x4 R, mat4x4 M, quat q)
 	R[3][0] = R[3][1] = R[3][2] = 0.f;
 	R[3][3] = 1.f;
 }
+
 static inline void quat_from_mat4x4(quat q, mat4x4 M)
 {
 	float r=0.f;
@@ -758,13 +781,24 @@ static inline void quat_from_mat4x4(quat q, mat4x4 M)
 	q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]])/(2.f*r);
 }
 
+static inline void quat_invert(quat i, quat q)
+{
+	quat_conj(i, q);
+	float mag_2 = quat_inner_product(q, q);
+	quat_scale(i, i, 1 / mag_2);
+}
+
 #ifdef __cplusplus
 
 struct Quat{
 	float* v;
 	float x, y, z, w;
 
-	Quat() {}
+	Quat() {
+		this->v = &this->x;
+		x = y = z = 0;
+		w = 1;
+	}
 	Quat(float x, float y, float z, float w)
 	{
 		this->x = x, this->y = y, this->z = z; this->w = w;
@@ -848,7 +882,18 @@ struct Quat{
 		return *this;
 	}
 
+	void invert()
+	{
+		quat_invert(this->v, this->v);
+	}
+
+	void from_axis_angle(float x, float y, float z, float angle)
+	{
+		quat_from_axis_angle(this->v, x, y, z, angle);
+	}
 };
+
+const Quat QUAT_I(0, 0, 0, 1);
 
 #endif
 
