@@ -401,7 +401,7 @@ static inline void mat4x4_mul_vec4(vec4 r, mat4x4 M, vec4 v)
 }
 static inline void mat4x4_translate(mat4x4 T, float x, float y, float z)
 {
-	mat4x4_identity(T);
+	//mat4x4_identity(T);
 	T[3][0] = x;
 	T[3][1] = y;
 	T[3][2] = z;
@@ -712,6 +712,31 @@ v' = v + q.w * t + cross(q.xyz, t)
 	vec3_add(r, v, t);
 	vec3_add(r, r, u);
 }
+
+static inline void mat3x3_from_quat(mat3x3 M, quat q)
+{
+	float a = q[3];
+	float b = q[0];
+	float c = q[1];
+	float d = q[2];
+	float a2 = a*a;
+	float b2 = b*b;
+	float c2 = c*c;
+	float d2 = d*d;
+
+	M[0][0] = a2 + b2 - c2 - d2;
+	M[0][1] = 2.f*(b*c + a*d);
+	M[0][2] = 2.f*(b*d - a*c);
+
+	M[1][0] = 2*(b*c - a*d);
+	M[1][1] = a2 - b2 + c2 - d2;
+	M[1][2] = 2.f*(c*d + a*b);
+
+	M[2][0] = 2.f*(b*d + a*c);
+	M[2][1] = 2.f*(c*d - a*b);
+	M[2][2] = a2 - b2 - c2 + d2;
+}
+
 static inline void mat4x4_from_quat(mat4x4 M, quat q)
 {
 	float a = q[3];
