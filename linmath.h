@@ -215,8 +215,11 @@ struct Vec3{
 const Vec3 VEC3_ZERO(0, 0, 0);
 const Vec3 VEC3_ONE(1, 1, 1);
 const Vec3 VEC3_LEFT(1, 0, 0);
+const Vec3 VEC3_RIGHT(-1, 0, 0);
 const Vec3 VEC3_UP(0, 1, 0);
+const Vec3 VEC3_DOWN(0, -1, 0);
 const Vec3 VEC3_FORWARD(0, 0, 1);
+const Vec3 VEC3_BACK(0, 0, -1);
 
 
 #endif
