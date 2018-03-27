@@ -89,6 +89,10 @@ static inline void vec3_reflect(vec3 r, vec3 v, vec3 n)
 }
 
 typedef vec3 mat3x3[3];
+typedef union {
+	vec3 v[3];
+	struct { vec3 c0, c1, c2; };
+} mat3x3_t;
 
 #ifdef __cplusplus
 
@@ -266,6 +270,11 @@ static inline void mat3x3_translate(mat3x3 R, float dx, float dy)
 }
 
 typedef float vec4[4];
+typedef struct {
+	vec4 v;
+	struct { float x, y, z, w; };
+} vec4_t;
+
 static inline void vec4_add(vec4 r, vec4 a, vec4 b)
 {
 	int i;
@@ -317,6 +326,11 @@ static inline void vec4_reflect(vec4 r, vec4 v, vec4 n)
 }
 
 typedef vec4 mat4x4[4];
+typedef union {
+	vec4 v[4];
+	struct { vec3 c0, c1, c2, c3; };
+} mat4x4_t;
+
 static inline void mat4x4_identity(mat4x4 M)
 {
 	int i, j;
@@ -635,6 +649,10 @@ static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
 }
 
 typedef float quat[4];
+typedef struct {
+	quat v;
+	struct { float x, y, z, w; };
+} quat_t;
 
 static inline void quat_identity(quat q)
 {
