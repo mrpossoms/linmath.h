@@ -211,6 +211,17 @@ struct Vec3{
 		return *this;
 	}
 
+	Vec3 normalize()
+	{
+		*this /= len();
+		return *this;
+	}
+
+	float len()
+	{
+		return sqrtf(dot(*this));
+	}
+
 	float dot(Vec3& v)
 	{
 		return vec3_mul_inner(this->v, v.v);
